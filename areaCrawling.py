@@ -9,8 +9,8 @@ areaHtml = urlopen(config.base_url + "ershoufang/")
 bsObj = BeautifulSoup(areaHtml, "html.parser", from_encoding="utf-8")
 areas = bsObj.find("div", {"data-role": "ershoufang"}).findAll("a")
 
-conn = pymysql.connect(host='192.168.226.129', port=3306, user='eason',
-                       passwd='Eason109!@#', db='lj_crawling', use_unicode=True, charset="utf8")
+conn = pymysql.connect(host=config.db_host, port=3306, user=config.db_user,
+                       passwd=config.db_passwd, db='lj_crawling', use_unicode=True, charset='utf8')
 cur = conn.cursor()
 cur.execute("DELETE FROM lj_area WHERE 1 = 1")
 
