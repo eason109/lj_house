@@ -6,6 +6,7 @@ import requests
 import re
 import time
 import json
+import HeadersConfig
 from bs4 import BeautifulSoup
 
 conn = pymysql.connect(host=config.db_host, port=3306, user=config.db_user,
@@ -16,29 +17,20 @@ areaResult = cur.fetchall()
 
 cur.execute("DELETE FROM lj_house WHERE 1 = 1")
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-    'Accept': 'text/html;q=0.9,*/*;q=0.8',
-    'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-    'Accept-Encoding': 'gzip',
-    'Connection': 'close',
-    'Referer': None  # 注意如果依然不能抓取的话，这里可以设置抓取网站的host
-}
-
 for row in areaResult:
     streetCode = row[1]
     reqUrl = config.base_url + "ershoufang/" + streetCode
-    res = requests.get(reqUrl, headers=headers).text
+    res = requests.get(reqUrl, headers=HeadersConfig.headers).text
     bsObj = BeautifulSoup(res, "html.parser")
     at = bsObj.find("div", {"class": "page-box house-lst-page-box"})
     page = bsObj.find("div", {"class": "page-box house-lst-page-box"}).attrs["page-data"]
-    pageCount = 1;
+    pageCount = 1
     if page:
         pageJson = json.loads(page)
         pageCount = pageJson["totalPage"]
     for i in range(pageCount):
         reqUrl = reqUrl + "/pg" + str(i) + "/"
-        res = requests.get(reqUrl, headers=headers).text
+        res = requests.get(reqUrl, headers=HeadersConfig.headers).text
         bsObj = BeautifulSoup(res, "html.parser")
         houses = bsObj.find("ul", {"class": "sellListContent"}).findAll("li")
         if houses:
@@ -66,3 +58,4 @@ for row in areaResult:
         else:
             continue
         time.sleep(60)
+cur.close()
